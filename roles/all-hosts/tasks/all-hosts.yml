@@ -1,0 +1,44 @@
+---
+- name: 1.1 Update cache and install packages
+  apt:
+    name:
+      - wget
+      - vim
+      - git
+      - htop
+      - curl
+      - ntp
+      - ssh
+    state: present
+    update_cache: yes
+
+# - name: Install docker no cluster
+#   shell: curl -fssl https://get.docker.com | bash
+      
+# - name: Instalação de pacotes
+#   apt:
+#     name: "{{ item }}"
+#   loop: "{{ all-hosts_packages }}"
+  
+- name: 1.2 Delete /etc/localtime.
+  file:
+    state: absent
+    path: /etc/localtime
+
+- name: 1.3 Configure timezone.
+  file: 
+    src: /usr/share/zoneinfo/America/Sao_Paulo
+    dest: /etc/localtime
+    state: link  
+
+- name: 1.4 Configure ntp.conf.
+  copy: 
+    dest: /etc/ntp.conf
+    content: |
+      server a.ntp.br 
+
+- name: 1.5 Restart ntp.service and enable boot init.
+  service:
+    name: ntp
+    state: restarted
+    enabled: yes

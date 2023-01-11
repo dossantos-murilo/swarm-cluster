@@ -1,0 +1,8 @@
+---
+all-hosts_packages:
+- wget
+- vim
+- git
+- htop
+- curl
+- ntp

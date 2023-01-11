@@ -1,0 +1,24 @@
+---
+- name: 3.1 Init cluster with command "swarm init".
+  command: docker swarm init --default-addr-pool 172.16.0.0/16
+  register: swarm_init_output
+
+- name: 3.2 Create file output "swarm init".
+  copy:
+    content: "{{ swarm_init_output.stdout }}"
+    dest: /home/ubuntu/swarminit
+
+- name: 3.3 Preparing swarmjoin script
+  shell: tail -3 /home/ubuntu/swarminit | sed '2,$d' > /home/ubuntu/swarmjoin.sh
+  
+- name: 3.4 Downloading locally swarmjoin.
+  fetch:
+    dest: ./join
+    src: /home/ubuntu/swarmjoin.sh
+
+- name: 3.5 Organize files
+  shell: |
+    cp join/{{ inventory_hostname }}/home/ubuntu/swarmjoin.sh join/  
+    rm -fr join/{{ inventory_hostname }}
+  delegate_to: localhost
+  become: no

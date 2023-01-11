@@ -1,0 +1,9 @@
+---
+- name: 4.1 Copying swarmjoin.sh for workers.
+  copy: 
+    src: ./join/swarmjoin.sh
+    dest: /home/ubuntu/swarmjoin.sh
+    mode: '0700'
+
+- name: 4.2 Adding workers to the cluster.
+  shell: /home/ubuntu/swarmjoin.sh

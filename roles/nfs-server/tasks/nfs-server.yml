@@ -1,0 +1,90 @@
+---
+- name: SKJDKSJDKSD
+  become: yes
+  tasks:
+    - name: Configurar hostname
+      hostname:
+        name: nfs-server
+        use: systemd
+    - name: Instalar serviço NFS
+      apt:
+        name: '{{ item }}'
+      loop: '{{ nfs_packages }}'
+    - name: Criação de partição
+      parted: null
+      device: '/dev/xvdb,/dev/xvdc'
+      number: 1
+      flags:
+        - lvm
+      state: present
+    - name: Criação volume group
+      lvg:
+        vg: raid
+        pvs: '/dev/xvdb,/dev/xvdc'
+        pesize: 20
+    - name: Criação logical volume
+      lvol:
+        vg: raid
+        lv: share
+        size: 19g
+        force: 'yes'
+    - name: Criando diretório /data
+      file:
+        path: /data
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/portainer
+      file:
+        path: /data/pornainer
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/traefik
+      file:
+        path: /data/traefik
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/syspass
+      file:
+        path: /data/syspass
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/syspass/syspass-config
+      file:
+        path: /data/syspass/syspass-config
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/syspass/syspass-backup
+      file:
+        path: /data/syspass/syspass-backup
+        state: directory
+        mode: '0755'
+    - name: Criando diretório /data/syspass/syspass-db
+      file:
+        path: /data/syspass/syspass-db
+        state: directory
+        mode: '0755'
+    - name: Formatando volume em ext4
+      filesystem:
+        fstype: ext4
+        dev: /dev/raid/share
+    - name: Montando volume
+      mount:
+        path: /data
+        src: /dev/raid/share
+        fstype: ext4
+        state: mounted
+    - name: Copiar /etc/exports
+      copy:
+        src: \swarm-cluster-aws\exports
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: '0755'
+        force: 'yes'
+    - name: Aplicar configurações com exportfs -a
+      commad: export -a
+    - name: Reiniciar e habilitar nfs.service no boot
+      service:
+        name: nfs
+        state: restarted
+        enabled: 'yes'

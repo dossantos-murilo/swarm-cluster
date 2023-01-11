@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+  app:
+    container_name: syspass-app
+    image: syspass/syspass:3.2.3
+    networks:
+      - traefik_proxy
+    restart: always
+    ports:
+      - "80"
+      - "443"
+    links:
+      - db
+    volumes:
+      - syspass-config:/var/www/html/sysPass/app/config
+      - syspass-backup:/var/www/html/sysPass/app/backup
+    environment:
+      - USE_SSL=yes
+  db:
+    container_name: syspass-db
+    restart: always
+    image: mariadb:10.2
+    networks:
+      - traefik_proxy
+    environment:
+      - MYSQL_ROOT_PASSWORD=syspass
+    ports:
+      - "3306"
+    volumes:
+      - syspass-db:/var/lib/mysql
+
+volumes:
+  syspass-config:
+     driver: local
+     driver_opts:
+       type: nfs
+       o: nfsvers=4,addr=0.0.0.0,rw
+       device: ":/data/syspass/syspass-config"
+
+   syspass-backup:
+     driver: local
+     driver_opts:
+       type: nfs
+       o: nfsvers=4,addr=0.0.0.0,rw
+       device: ":/data/syspass/syspass-backup"
+
+   syspass-db:
+     driver: local
+     driver_opts:
+       type: nfs
+       o: nfsvers=4,addr=0.0.0.0,rw
+       device: ":/data/syspass/syspass-db"

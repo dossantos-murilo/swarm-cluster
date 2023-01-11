@@ -1,0 +1,50 @@
+---
+# Linha de código responsável por chamar a role “all-hosts” que aplicará as configurações para as máquinas que tiverem a tag name swarm.
+- name: Install packages nessaries and configure NTP Server
+  become: yes
+  hosts: tag_name_swarm
+  tasks:
+    - include_role:
+        name: all-hosts
+        tasks_from: all-hosts.yml
+  # roles:
+  #   - all-hosts
+
+- name: 2. Install Docker.
+  become: yes
+  hosts: tag_name_swarm
+  tasks:
+    - include_role:
+        name: swarm-all
+        tasks_from: swarm-all.yml
+  # roles:
+  #   - swarm-all
+
+# Linha de código responsável por chamar a role “nfs-server” que aplicará as configurações para as máquinas que tiverem a tag type nfs.
+# - name: Configurar servidor NFS
+#   become: yes
+#   hosts: tag_type_nfs
+#   roles:
+#     - nfs-server
+
+# Linha de código responsável por chamar a role “swarm-master” que aplicará as configurações para as máquinas que tiverem a tag type master.
+- name: 3. Init Cluster Swarm and prepare "script-join" workers.
+  become: yes
+  hosts: tag_type_master
+  tasks:
+    - include_role:
+        name: swarm-master
+        tasks_from: swarm-master.yml
+  # roles:
+  #   - swarm-master
+
+# # Linha de código responsável por chamar a role “swarm-worker” que aplicará as configurações para as máquinas que tiverem a tag type worker.
+- name: 4. Ingress workers in cluster.
+  become: yes
+  hosts: tag_type_worker
+  tasks:
+    - include_role:
+        name: swarm-worker
+        tasks_from: swarm-worker.yml
+  # roles:
+  #   - swarm-worker
